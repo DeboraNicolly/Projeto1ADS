@@ -13,6 +13,7 @@ Casos_C16_UF <- read.csv("PAINEL_ONCOLOGIABR17473335525.csv", header=TRUE, sep =
 
 #Excluindo colunas da estimativa_polulacao - uma em branco e uma com o total por ano, o que não é desejável
 estimativa_populacao <- estimativa_populacao[-c(28, 29), ]
+Casos_C16_UF <- Casos_C16_UF[-28, ]
 
 #Criando a variável total em estimativa_populacao
 estimativa_populacao <- estimativa_populacao |>
@@ -32,38 +33,33 @@ estimativa_populacao <- estimativa_populacao |>
 Casos_C16_UF <- Casos_C16_UF |>
   mutate(`Unidade da Federação` = str_remove(`Unidade da Federação`, "^\\d+\\s+"))
 
-#formato largo
+#Deixando os dados no formato largo
 
-# vetor por casos
+#vetor por ano
 anos <- as.character(2013:2021)
 
-# 1) Faz o join incluindo o Total de cada base
-df_join <- Casos_C16_UF %>%
+#Faz o join incluindo o Total de cada base
+df_join <- Casos_C16_UF |>
   left_join(
-    estimativa_populacao %>%
+    estimativa_populacao |>
       select(`Unidade da Federação`, all_of(anos), Total),
     by = "Unidade da Federação",
     suffix = c("_casos", "_pop")
   )
 
-# 2) Calcula as taxas por 100k anos e total
-df_taxas_wide <- df_join |>
+#Calcula as taxas por 100.000 habitantes e arredonda para 2 casas decimais
+Taxa_de_C16 <- df_join |>
   transmute(
     `Unidade da Federação`,
     # anos 2013–2021
     across(
       ends_with("_casos"),
       ~ .x / get(str_replace(cur_column(), "_casos$", "_pop")) * 100000,
-      .names = "{sub('_casos$', '', .col)}"
-    ),
-    # taxa total:
-    Total = Total_casos / Total_pop * 100000
-  ) %>%
-  # 3) arredonda para 1 casa decimal
+      .names = "{sub('_casos$', '', .col)}"), Total = Total_casos / Total_pop * 100000) |>
   mutate(across(-`Unidade da Federação`, ~ round(.x, 2)))
 
-# Dá um View() para conferir
-View(df_taxas_wide)
+#Renomeando a coluna que indica a taxa do valor total
+colnames(Taxa_de_C16)[colnames(Taxa_de_C16) == "Total"] <- "Taxa"
 
-View(estimativa_populacao)
-View(Casos_C16_UF)
+#Visualizar os dados
+View(Taxa_de_C16)

@@ -1,0 +1,43 @@
+ Mortalidade - Brasil
+Óbitos p/Residênc por Unidade da Federação e Ano do Óbito
+Categoria CID-10: C16   Neopl malig do estomago
+Período:2013-2021
+"Unidade da Federação";"2013";"2014";"2015";"2016";"2017";"2018";"2019";"2020";"2021";"Total"
+"11 Rondônia";102;82;94;80;100;112;128;110;119;927
+"12 Acre";54;52;60;67;58;55;34;40;36;456
+"13 Amazonas";267;291;286;315;306;342;316;289;310;2722
+"14 Roraima";30;30;17;31;36;23;40;35;31;273
+"15 Pará";502;553;547;607;579;578;602;598;584;5150
+"16 Amapá";46;48;55;50;52;52;72;57;56;488
+"17 Tocantins";45;53;56;67;91;64;70;68;77;591
+"21 Maranhão";274;273;334;304;305;309;353;282;285;2719
+"22 Piauí";118;134;158;166;145;140;143;139;147;1290
+"23 Ceará";721;728;778;815;766;833;853;760;750;7004
+"24 Rio Grande do Norte";230;243;236;238;236;270;279;262;237;2231
+"25 Paraíba";316;294;278;271;281;292;301;257;251;2541
+"26 Pernambuco";550;534;592;587;550;581;625;606;622;5247
+"27 Alagoas";112;101;126;107;121;127;125;139;131;1089
+"28 Sergipe";111;86;83;98;95;103;95;99;100;870
+"29 Bahia";679;757;720;742;805;844;869;797;841;7054
+"31 Minas Gerais";1492;1448;1405;1497;1465;1463;1529;1363;1508;13170
+"32 Espírito Santo";296;276;288;322;284;332;355;297;308;2758
+"33 Rio de Janeiro";1365;1314;1285;1335;1253;1236;1163;1140;1099;11190
+"35 São Paulo";3650;3521;3586;3597;3479;3553;3734;3275;3413;31808
+"41 Paraná";928;1007;1029;966;904;1044;1005;891;965;8739
+"42 Santa Catarina";553;543;564;612;589;640;604;635;652;5392
+"43 Rio Grande do Sul";942;835;852;889;912;907;944;863;912;8056
+"50 Mato Grosso do Sul";171;180;162;180;197;192;147;180;168;1577
+"51 Mato Grosso";161;156;171;179;169;165;199;177;165;1542
+"52 Goiás";306;335;355;345;345;340;348;327;340;3041
+"53 Distrito Federal";161;154;148;184;191;165;178;164;153;1498
+"Total";14182;14028;14265;14651;14314;14762;15111;13850;14260;129423
+ Fonte: MS/SVS/CGIAE - Sistema de Informações sobre Mortalidade - SIM
+ Notas:
+ 
+ Dados finais disponíveis até 2023. Data da atualização dos dados 12/2024.
+ Em 2011, houve uma mudança no conteúdo da Declaração de Óbito, com maior detalhamento das informações coletadas. Para este ano, foram
+ utilizados simultaneamente os dois formulários. Para mais detalhes sobre as mudanças ocorridas e os seus efeitos, veja o documento
+ "Sistema de Informações sobre Mortalidade - SIM. Consolidação da base de dados de 2011".
+ No dia 13/06/2019, os arquivos do SIM referentes ao ano de notificação 2017 foram atualizados, com alteração das causas básicas de 2 registros e exclusão de 1 registro.
+ No dia 01/04/2020, os arquivos do SIM referentes ao ano de notificação 2019 foram atualizados, com alteração das causas básicas de 4 registros e exclusão de 1 registro.
+ 

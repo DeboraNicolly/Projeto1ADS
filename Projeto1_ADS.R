@@ -11,9 +11,8 @@ Sys.setlocale("LC_ALL","pt_BR.UTF-8")
 estimativa_populacao <- read.csv("ibge_cnv_poptuf152625177_20_136_208.csv", header=TRUE, sep = ";")
 Casos_C16_UF <- read.csv("PAINEL_ONCOLOGIABR17473335525.csv", header=TRUE, sep = ";")
 
-#Excluindo colunas da estimativa_polulacao - uma em branco e uma com o total por ano, o que não é desejável
-estimativa_populacao <- estimativa_populacao[-c(28, 29), ]
-Casos_C16_UF <- Casos_C16_UF[-28, ]
+#Exclui uma coluna em branco da estimativa_polulacao - o que não é desejável
+estimativa_populacao <- estimativa_populacao[-29, ]
 
 #Criando a variável total em estimativa_populacao
 estimativa_populacao <- estimativa_populacao |>
@@ -62,4 +61,6 @@ Taxa_de_C16 <- df_join |>
 colnames(Taxa_de_C16)[colnames(Taxa_de_C16) == "Total"] <- "Taxa"
 
 #Visualizar os dados
+View(estimativa_populacao)
+View(Casos_C16_UF)
 View(Taxa_de_C16)

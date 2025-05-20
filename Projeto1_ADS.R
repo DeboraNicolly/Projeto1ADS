@@ -10,6 +10,8 @@ Sys.setlocale("LC_ALL","pt_BR.UTF-8")
 #Importa os dados
 estimativa_populacao <- read.csv("ibge_cnv_poptuf152625177_20_136_208.csv", header=TRUE, sep = ";")
 Casos_C16_UF <- read.csv("PAINEL_ONCOLOGIABR17473335525.csv", header=TRUE, sep = ";")
+Obitos_C16 <- read.csv("obito_C16_2013_2021.csv", header=TRUE, sep = ";")
+casos_C16_Faixa_etaria <- read.csv("PAINEL_ONCOLOGIA_C16_faixa_etaria_2013_2021.csv", header=TRUE, sep = ";")
 
 #Exclui uma coluna em branco da estimativa_polulacao - o que não é desejável
 estimativa_populacao <- estimativa_populacao[-29, ]
@@ -64,3 +66,5 @@ colnames(Taxa_de_C16)[colnames(Taxa_de_C16) == "Total"] <- "Taxa"
 View(estimativa_populacao)
 View(Casos_C16_UF)
 View(Taxa_de_C16)
+View(Obitos_C16)
+View(casos_C16_Faixa_etaria)

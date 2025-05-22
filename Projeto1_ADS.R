@@ -4,28 +4,25 @@ library(stringr)
 library(tidyverse)
 library (readr)
 
-#Garante que o R interprete e exiba corretamente acentos, cedilhas e outros símbolos do português do Brasil
-Sys.setlocale("LC_ALL","pt_BR.UTF-8")
-
 #Importa os dados
 estimativa_populacao <- read.csv("ibge_cnv_poptuf152625177_20_136_208.csv", header=TRUE, sep = ";")
 Casos_C16_UF <- read.csv("PAINEL_ONCOLOGIABR17473335525.csv", header=TRUE, sep = ";")
 Obitos_C16 <- read.csv("obito_C16_2013_2021.csv", header=TRUE, sep = ";")
-casos_C16_Faixa_etaria <- read.csv("PAINEL_ONCOLOGIA_C16_faixa_etaria_2013_2021.csv", header=TRUE, sep = ";")
 
-#Exclui uma coluna em branco da estimativa_polulacao - o que não é desejável
+#Exclui uma linha em branco da estimativa_polulacao - o que não é desejável
 estimativa_populacao <- estimativa_populacao[-29, ]
 
-#Criando a variável total em estimativa_populacao
-estimativa_populacao <- estimativa_populacao |>
-  mutate(sum = rowSums(across(c("X2013", "X2014", "X2015", "X2016", "X2017", "X2018", "X2019", "X2020", "X2021"))))
+#Exclui a coluna de Total por estado de Obitos_C16 e Casos_C16_UF, o que não será utilizado na análise
+Obitos_C16 <- Obitos_C16 |> select(-"Total")
+Casos_C16_UF <- Casos_C16_UF |> select(-"X.Total")
 
 #Define o nome das variáveis
-variaveis = c("Unidade da Federação", as.character(2013:2021), "Total")
+variaveis = c("Unidade da Federação", as.character(2013:2021))
 
 #Renomear o nome das variáveis
 colnames(estimativa_populacao) <- variaveis
 colnames(Casos_C16_UF) <- variaveis
+colnames(Obitos_C16)<- variaveis
 
 #Retira o número da frente das UFs
 estimativa_populacao <- estimativa_populacao |>
@@ -34,37 +31,46 @@ estimativa_populacao <- estimativa_populacao |>
 Casos_C16_UF <- Casos_C16_UF |>
   mutate(`Unidade da Federação` = str_remove(`Unidade da Federação`, "^\\d+\\s+"))
 
-#Deixando os dados no formato largo
+Obitos_C16 <- Obitos_C16 |>
+  mutate(`Unidade da Federação` = str_remove(`Unidade da Federação`, "^\\d+\\s+"))
+
+#Deixando os dados no formato longo
 
 #vetor por ano
 anos <- as.character(2013:2021)
 
-#Faz o join incluindo o Total de cada base
-df_join <- Casos_C16_UF |>
-  left_join(
-    estimativa_populacao |>
-      select(`Unidade da Federação`, all_of(anos), Total),
-    by = "Unidade da Federação",
-    suffix = c("_casos", "_pop")
-  )
 
-#Calcula as taxas por 100.000 habitantes e arredonda para 2 casas decimais
-Taxa_de_C16 <- df_join |>
-  transmute(
-    `Unidade da Federação`,
-    # anos 2013–2021
-    across(
-      ends_with("_casos"),
-      ~ .x / get(str_replace(cur_column(), "_casos$", "_pop")) * 100000,
-      .names = "{sub('_casos$', '', .col)}"), Total = Total_casos / Total_pop * 100000) |>
-  mutate(across(-`Unidade da Federação`, ~ round(.x, 2)))
+#Pivota cada base para long
+pop_long <- estimativa_populacao |>
+  pivot_longer(all_of(anos), names_to = "ano", values_to = "pop")
 
-#Renomeando a coluna que indica a taxa do valor total
-colnames(Taxa_de_C16)[colnames(Taxa_de_C16) == "Total"] <- "Taxa"
+casos_long <- Casos_C16_UF |>
+  pivot_longer(all_of(anos), names_to = "ano", values_to = "casos")
 
-#Visualizar os dados
-View(estimativa_populacao)
-View(Casos_C16_UF)
+obitos_long <- Obitos_C16 |>
+  pivot_longer(all_of(anos), names_to = "ano", values_to = "obitos")
+
+# 2) Unir as três bases long
+Taxa_de_C16 <- casos_long |>
+  left_join(obitos_long, by = c("Unidade da Federação", "ano")) |>
+  left_join(pop_long,   by = c("Unidade da Federação", "ano"))
+
+# 3) Mapear estado → região, calcular taxas e selecionar colunas finais
+Taxa_de_C16 <- Taxa_de_C16 |>
+  mutate(
+    regiao = case_when(
+      `Unidade da Federação` %in% c("Acre", "Amapa", "Amazonas", "Para", "Rondonia", "Roraima", "Tocantins") ~ "Norte",
+      `Unidade da Federação` %in% c("Alagoas", "Bahia", "Ceara", "Maranhao", "Paraiba", "Pernambuco", "Piaui", "Rio Grande do Norte", "Sergipe") ~ "Nordeste",
+      `Unidade da Federação` %in% c("Distrito Federal", "Goias", "Mato Grosso", "Mato Grosso do Sul") ~ "Centro-Oeste",
+      `Unidade da Federação` %in% c("Espirito Santo", "Minas Gerais", "Rio de Janeiro", "Sao Paulo") ~ "Sudeste",
+      `Unidade da Federação` %in% c("Parana", "Rio Grande do Sul", "Santa Catarina") ~ "Sul",
+      `Unidade da Federação` %in% ("Total") ~ "Brasil",
+      TRUE ~ NA_character_
+    ),
+    taxa_diagnosticos = round(casos  / pop * 100000, 2),
+    taxa_obitos       = round(obitos / pop * 100000, 2)
+  ) |>
+  select(`Unidade da Federação`, taxa_diagnosticos, taxa_obitos, ano, regiao)
+
+# Visualizar o resultado
 View(Taxa_de_C16)
-View(Obitos_C16)
-View(casos_C16_Faixa_etaria)

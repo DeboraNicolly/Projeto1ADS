@@ -1,4 +1,5 @@
 #Chamando as bibliotecas
+library(ggthemes)
 library(dplyr)
 library(stringr)
 library(tidyverse)
@@ -73,4 +74,16 @@ Taxa_de_C16 <- Taxa_de_C16 |>
   select(`Unidade da Federação`, taxa_diagnosticos, taxa_obitos, ano, regiao)
 
 # Visualizar o resultado
+summary(Taxa_de_C16)
 View(Taxa_de_C16)
+
+# Gráfico não deu certo
+ggplot(Taxa_de_C16, aes(x = ano, y = taxa_diagnosticos)) +
+  geom_smooth(method = "lm") +
+  labs(
+    title = "Análise da taxa de diagnósticos de Neoplasia maligna do estômago",
+    subtitle = "Análise da taxa de diagnósticos de Neoplasia maligna do estômago ao longo dos anos de 2013 a 2021",
+    x = "ano",
+    y = "Taxa de diagnóstico (por 100.000 habitantes)",
+  ) +
+  scale_color_colorblind()

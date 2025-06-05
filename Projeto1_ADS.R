@@ -102,7 +102,7 @@ ggplot(Taxa_de_C16 |> filter(regiao != "Brasil" & !is.na(regiao)),
   scale_x_continuous(breaks = seq(min(Taxa_de_C16$ano, na.rm = TRUE), max(Taxa_de_C16$ano, na.rm = TRUE), by = 2)) +
   theme_light(base_size = 12)
 
-
+#-----------------------------------------------------
 
 # Taxa média de diagnósticos por região (2013-2021)
 media_regiao_diagnosticos <- Taxa_de_C16 |>
@@ -135,7 +135,30 @@ media_uf_diagnosticos <- Taxa_de_C16 |>
   arrange(desc(media_taxa_diagnosticos)) |>
   ungroup() # desagrupar para visualizações ou próximas manipulações
 
-# Top 10 UFs
+#-------------------------------------------
+# Corrigindo a tabela e ordenando pela taxa média de óbitos
+media_regiao_obitos_corrigido <- Taxa_de_C16 |>
+  filter(regiao != "Brasil" & !is.na(regiao)) |>
+  group_by(regiao) |>
+  summarise(
+    media_taxa_diagnosticos = mean(taxa_diagnosticos, na.rm = TRUE),
+    media_taxa_obitos = mean(taxa_obitos, na.rm = TRUE)
+  ) |>
+  arrange(desc(media_taxa_obitos)) # Ordenando corretamente
+
+print(media_regiao_obitos_corrigido)
+
+# Gráfico de barras para comparar a média da taxa de óbitos por região
+ggplot(media_regiao_obitos_corrigido, aes(x = reorder(regiao, -media_taxa_obitos), y = media_taxa_obitos)) +
+  geom_bar(stat = "identity", fill = "tomato3", color = "black") +
+  geom_text(aes(label = round(media_taxa_obitos, 2)), vjust = -0.5, size = 3.5) + # Adiciona os valores nas barras
+  labs(title = "Média da Taxa de Óbitos por C16 por Região (2013-2021)",
+       x = "Região",
+       y = "Taxa Média de Óbitos (por 100.000 habitantes)") +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) # Melhora a leitura dos rótulos do eixo x se forem muitos
+#-------------------------------------------
+# Top 10 UFs por diagnóstico
 top_10_uf <- media_uf_diagnosticos |> slice_max(order_by = media_taxa_diagnosticos, n = 10)
 print(top_10_uf)
 
@@ -147,7 +170,38 @@ ggplot(top_10_uf, aes(x = reorder(`Unidade da Federação`, -media_taxa_diagnost
        x = "Unidade da Federação", y = "Taxa Média de Diagnóstico (por 100.000 hab.)", fill="Região") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) # Rotacionar texto do eixo X
+#------------------------------------------------------
+# top 10 UFS por óbito
+# Calcular a média da taxa de óbitos por UF e região
+media_uf_obitos <- Taxa_de_C16 |>
+  filter(regiao != "Brasil" & `Unidade da Federação` != "Total" & !is.na(regiao)) |> # Exclui o total nacional e UFs sem região definida
+  group_by(`Unidade da Federação`, regiao) |>
+  summarise(
+    media_taxa_obitos = mean(taxa_obitos, na.rm = TRUE),
+    .groups = 'drop' # Remove o agrupamento após o summarise
+  ) |>
+  arrange(desc(media_taxa_obitos)) # Ordena da maior para a menor média
 
+# Selecionar as Top 10 UFs
+top_10_uf_obitos <- media_uf_obitos |>
+  slice_head(n = 10)
+
+# Visualizar a tabela das Top 10 UFs
+print(top_10_uf_obitos)
+
+# Gráfico de barras para as Top 10 UFs por média da taxa de óbitos
+ggplot(top_10_uf_obitos, aes(x = reorder(`Unidade da Federação`, -media_taxa_obitos),
+                             y = media_taxa_obitos,
+                             fill = regiao)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = round(media_taxa_obitos, 2)), vjust = -0.5, size = 3.5) + # Adiciona os valores nas barras
+  labs(title = "Top 10 UFs por Média da Taxa de Óbitos por C16 (2013-2021)",
+       subtitle = "Neoplasia maligna do estômago",
+       x = "Unidade da Federação",
+       y = "Taxa Média de Óbitos (por 100.000 habitantes)",
+       fill = "Região") +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) # Rotaciona os rótulos do eixo X para melhor leitura
 
 #__________________________
 
@@ -171,4 +225,25 @@ ggplot(rn_data, aes(x = ano, y = taxa_diagnosticos)) +
   scale_x_continuous(breaks = seq(min(rn_data$ano, na.rm = TRUE), max(rn_data$ano, na.rm = TRUE), by = 1)) +
   theme_minimal()
 
-#_________________________
+#-----------------------------------
+# Filtrar dados para o Brasil (onde Unidade da Federação é "Total" ou regiao é "Brasil")
+dados_brasil_obitos <- Taxa_de_C16 |>
+  filter(`Unidade da Federação` == "Total") # Ou filter(regiao == "Brasil")
+
+# Visualizar os dados filtrados para conferência (opcional)
+# print(dados_brasil_obitos)
+
+# Gráfico da evolução temporal da taxa de óbitos para o Brasil
+ggplot(dados_brasil_obitos, aes(x = ano, y = taxa_obitos)) +
+  geom_line(color = "firebrick", linewidth = 1) +  # Linha da evolução
+  geom_point(color = "firebrick", size = 2.5, shape=21, fill="white", stroke=1.5) + # Pontos para cada ano
+  geom_smooth(method = "lm", se = FALSE, color = "dodgerblue", linetype = "dashed") + # Linha de tendência linear (opcional)
+  scale_x_continuous(breaks = seq(min(dados_brasil_obitos$ano, na.rm = TRUE),
+                                  max(dados_brasil_obitos$ano, na.rm = TRUE), by = 1)) + # Garante que todos os anos apareçam no eixo X
+  labs(title = "Evolução da Taxa de Óbitos por C16 no Brasil",
+       subtitle = "Neoplasia maligna do estômago (2013-2021)",
+       x = "Ano",
+       y = "Taxa de Óbitos (por 100.000 habitantes)") +
+  theme_minimal(base_size = 14) +
+  theme(plot.title = element_text(hjust = 0.5), # Centraliza o título
+        plot.subtitle = element_text(hjust = 0.5)) # Centraliza o subtítulo
